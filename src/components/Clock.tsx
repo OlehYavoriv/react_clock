@@ -1,46 +1,55 @@
 import React from 'react';
-type Props = {
-  name: string;
-};
+
 type State = {
-  currentTime: string;
+  today: string;
 };
+
+interface Props {
+  name: string;
+}
+
 export class Clock extends React.Component<Props, State> {
   state: State = {
-    currentTime: new Date().toUTCString().slice(-12, -4),
+    today: new Date().toUTCString().slice(-12, -4),
   };
 
-  timerId: number | undefined;
+  timerTimeId = 0;
 
-  componentDidMount() {
-    this.timerId = window.setInterval(() => {
-      const now = new Date().toUTCString().slice(-12, -4);
+  timerConsoleId = 0;
 
-      // eslint-disable-next-line no-console
-      console.log(now);
-      this.setState({ currentTime: now });
+  componentDidMount(): void {
+    this.timerTimeId = window.setInterval(() => {
+      this.setState({ today: `${new Date().toUTCString().slice(-12, -4)}` });
+    }, 1000);
+
+    this.timerConsoleId = window.setInterval(() => {
+      this.setState((prevState: Readonly<State>) => {
+        // eslint-disable-next-line no-console
+        console.log(prevState.today);
+      });
     }, 1000);
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>): void {
+  componentDidUpdate(prevProps: Props) {
     if (prevProps.name !== this.props.name) {
       // eslint-disable-next-line no-console
       console.warn(`Renamed from ${prevProps.name} to ${this.props.name}`);
     }
   }
 
-  componentWillUnmount() {
-    if (this.timerId) {
-      clearInterval(this.timerId);
-    }
+  componentWillUnmount(): void {
+    window.clearInterval(this.timerTimeId);
+    window.clearInterval(this.timerConsoleId);
   }
 
   render() {
     return (
       <div className="Clock">
         <strong className="Clock__name">{this.props.name}</strong>
+
         {' time is '}
-        <span className="Clock__time">{this.state.currentTime}</span>
+
+        <span className="Clock__time">{this.state.today}</span>
       </div>
     );
   }
